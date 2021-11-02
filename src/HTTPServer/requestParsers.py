@@ -10,6 +10,7 @@ scriptPostParser = reqparse.RequestParser()
 scriptPostParser.add_argument("sName", required=True, type=str, help="Script Name")
 scriptPostParser.add_argument("sDescription", required=True, type=str, help="Script Description")
 scriptPostParser.add_argument("sSource", required=True, type=str, help="Script Source")
+scriptPostParser.add_argument("isAbusive", required=True, type=bool, help="Abusive")
 
 scriptDeleteParser = reqparse.RequestParser()
 scriptDeleteParser.add_argument("sName", required=True, type=str, help="Script Name")

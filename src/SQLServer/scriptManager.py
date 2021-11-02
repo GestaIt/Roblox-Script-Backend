@@ -21,10 +21,11 @@ def write_schema_to_db():
         try:
             cursor.execute("""
                 CREATE TABLE scripts(
-                    affiliatedKey TEXT PRIMARY KEY,
+                    affiliatedKey TEXT,
                     scriptName TEXT,
                     scriptDescription TEXT,
                     scriptSource TEXT,
+                    isAbusive BOOLEAN,
                     timeAdded INTEGER
                 )""")
         except sqlite3.Error:
@@ -45,20 +46,21 @@ CREATE TABLE scripts(
     scriptName TEXT,
     scriptDescription TEXT,
     scriptSource TEXT,
+    isAbusive BOOLEAN,
     timeAdded INTEGER
 )
 """
 
 
 # Inserts a new script into the SQL database. Returns whether the operation was a success or not.
-def insert_script(script_name: str, script_description: str, script_source: str, api_key: str) -> bool:
+def insert_script(script_name: str, script_description: str, is_abusive: bool, script_source: str, api_key: str) -> bool:
     with sqlite3.connect(scripts_database) as connection:
         cursor = connection.cursor()
 
         try:
-            cursor.execute("INSERT INTO scripts VALUES (:aToken, :sName, :sDescription, :sSource, :dTime)",
+            cursor.execute("INSERT INTO scripts VALUES (:aToken, :sName, :sDescription, :sSource, :iA, :dTime)",
                            {"aToken": api_key, "sName": script_name, "sDescription": script_description,
-                            "sSource": script_source, "dTime": datetime.today().timestamp()})
+                            "sSource": script_source, "iA": is_abusive, "dTime": datetime.today().timestamp()})
         except sqlite3.Error as err:
             print(f"Failed to add {script_name} to database. The following error occurred:\n\n{err}")
             return False

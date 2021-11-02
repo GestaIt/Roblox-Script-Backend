@@ -12,7 +12,7 @@ from ipwhois import IPWhois
 from waitress import serve
 
 from src.HTTPServer.requestParsers import scriptPostParser, scriptDeleteParser
-from src.SQLServer import insert_script, remove_script, get_scripts, is_key_real
+from src.SQLServer import insert_script, remove_script, get_scripts
 
 cached_ips = {"127.0.0.1": True}  # Our local ip.
 
@@ -45,11 +45,10 @@ class ScriptsListGet(Resource):
             if "AUTH-TOKEN" in headers:
                 auth_token = headers["AUTH-TOKEN"]
 
-                if is_key_real(auth_token):
-                    scripts_fetch_success, scripts = get_scripts(auth_token)
+                scripts_fetch_success, scripts = get_scripts(auth_token)
 
-                    if scripts_fetch_success:
-                        return scripts, 200
+                if scripts_fetch_success:
+                    return scripts, 200
 
         return [], 500
 
@@ -64,17 +63,16 @@ class InsertScriptPost(Resource):
         if is_from_roblox:
             if "AUTH-TOKEN" in headers:
                 auth_token = headers["AUTH-TOKEN"]
+                request_arguments = scriptPostParser.parse_args()
+                script_name = request_arguments["sName"]
+                script_description = request_arguments["sDescription"]
+                script_source = request_arguments["sSource"]
+                is_abusive = request_arguments["isAbusive"]
 
-                if is_key_real(auth_token):
-                    request_arguments = scriptPostParser.parse_args()
-                    script_name = request_arguments["sName"]
-                    script_description = request_arguments["sDescription"]
-                    script_source = request_arguments["sSource"]
+                insert_success = insert_script(script_name, script_description, is_abusive, script_source, auth_token)
 
-                    insert_success = insert_script(script_name, script_description, script_source, auth_token)
-
-                    if insert_success:
-                        return 200
+                if insert_success:
+                    return 200
 
         return 500
 
@@ -89,15 +87,13 @@ class RemoveScriptDelete(Resource):
         if is_from_roblox:
             if "AUTH-TOKEN" in headers:
                 auth_token = headers["AUTH-TOKEN"]
+                request_arguments = scriptDeleteParser.parse_args()
+                script_name = request_arguments["sName"]
 
-                if is_key_real(auth_token):
-                    request_arguments = scriptDeleteParser.parse_args()
-                    script_name = request_arguments["sName"]
+                delete_success = remove_script(script_name, auth_token)
 
-                    delete_success = remove_script(script_name, auth_token)
-
-                    if delete_success:
-                        return 200
+                if delete_success:
+                    return 200
 
         return 500
 
